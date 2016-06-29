@@ -2,51 +2,67 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create
 
 function preload() {
 	game.load.image('sky', 'assets/topwall.png');
-   // game.load.image('ground', 'assets/ground.png');
-    //game.load.image('star', 'assets/KMA_Warp_Star_sprite.png');
+    game.load.image('wall', 'assets/wall.png');
     game.load.spritesheet('dude2', 'assets/dude.png', 32, 48);
     game.load.spritesheet('dude', 'assets/52.png', 32, 48);
+
+    game.load.audio('boden', ['assets/audio/music1.mp3']);
 }
 
-var platforms;
+var walls;
 var player;
 var enemy;
 var moveBlocked=false;
-
+var music;
 
 function create() {
     
+    music = game.add.audio('boden');
+
+    //decomment line for music
+    //music.play();
+
 	 //  We're going to be using physics, so enable the Arcade Physics system / physics mise en place
     game.physics.startSystem(Phaser.Physics.ARCADE);
     //  A simple background for our game
     game.add.sprite(0, 0, 'sky');
 
     //  The platforms group contains the ground and the 2 ledges we can jump on
-    platforms = game.add.group();
+    walls = game.add.group();
 
     //  We will enable physics for any object that is created in this group
-    platforms.enableBody = true;
+    walls.enableBody = true;
 
-    // Here we create the ground.
-   // var ground = platforms.create(0, game.world.height - 64, 'ground');
+    // Top wall
+    for (var i = 0; i <= 20; i++) {
+         var wall = walls.create(i*40, 0, 'wall');
+        wall.scale.setTo(1,1);
+        wall.body.immovable=true;
+    }
 
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-   // ground.scale.setTo(2, 2);
+    for (var i = 0; i <= 20; i++) {
+         var wall = walls.create(i*40, game.world.height-40, 'wall');
+        wall.scale.setTo(1,1);
+        wall.body.immovable=true;
+    }
 
-    //  This stops it from falling away when you jump on it
-    //ground.body.immovable = true;
+    for (var i = 0; i <= 15; i++) {
+         var wall = walls.create(0, i*40, 'wall');
+        wall.scale.setTo(1,1);
+        wall.body.immovable=true;
+    }
 
-    //  Now let's create two ledges
-   // var ledge = platforms.create(400, 400, 'ground');
+    for (var i = 0; i <= 15; i++) {
+         var wall = walls.create(game.world.width-40, i*40, 'wall');
+        wall.scale.setTo(1,1);
+        wall.body.immovable=true;
+    }
+   
 
-    //ledge.body.immovable = true;
-
-   // ledge = platforms.create(-150, 250, 'ground');
-
-    //ledge.body.immovable = true;
+    
     //---------------------------------PLAYER part------------------------------//
     // The player and its settings
-    player = game.add.sprite(32, game.world.height - 150, 'dude');
+    player = game.add.sprite(320, game.world.height - 150, 'dude');
 
     //  We need to enable physics on the player
     game.physics.enable(player, Phaser.Physics.ARCADE);
@@ -119,6 +135,35 @@ function pdvMin (player, enemy) {
     game.time.events.add(Phaser.Timer.SECOND * 1, delockMove, this)
 }
 
+function dashTo(direction){
+    console.log("dash" + cursors.up.shiftKey);
+    if (cursors.up.shiftKey)
+    {
+        switch(direction){
+            case 'up':
+                console.log("dash up");
+                player.body.velocity.y = -2;
+                player.y -= 20;
+                break;
+            case 'down':
+                console.log("dash down");
+                player.body.velocity.y = 2;
+                player.y += 20;
+                break;
+            case 'left':
+                console.log("dash left");
+                player.body.velocity.x = -2;
+                player.x -= 20;
+                break;
+            case 'right':
+                console.log("dash right");
+                player.body.velocity.x = 2;
+                player.x += 20;
+                break;
+        }
+    }
+}
+
 function delockMove(){
     console.log("delockMove");
     moveBlocked=false;
@@ -127,7 +172,7 @@ function delockMove(){
 function update() {
 	//  Collide the player and the stars with the platforms
     game.physics.arcade.overlap(player, enemy, pdvMin, null, this);
-    //game.physics.arcade.collide(player, enemy);
+    game.physics.arcade.collide(player, walls);
    
     
     //---------------------------------------CONTROL PART--------------------------------------//
@@ -140,26 +185,30 @@ function update() {
         if (cursors.left.isDown)
         {
             //  Move to the left
-             player.body.velocity.x = -2;
+            player.body.velocity.x = -2;
             player.x -= 2;
 
             player.animations.play('left');
+            dashTo("left");
         }
         else if (cursors.right.isDown)
         {
             //  Move to the right
-             player.body.velocity.x = 2;
+            player.body.velocity.x = 2;
             player.x += 2;
 
             player.animations.play('right');
+            dashTo("rigth");
         }
         else if (cursors.up.isDown)
         {
             //  Move to the right
-             player.body.velocity.y = -2;
+            player.body.velocity.y = -2;
             player.y -= 2;
 
             player.animations.play('up');
+            dashTo("up");
+
         }
         else if (cursors.down.isDown)
         {
@@ -168,16 +217,17 @@ function update() {
             player.y += 2;
 
             player.animations.play('down');
+            dashTo("down");
         }
         else
         {
             //  Stand still
             player.animations.stop();
-
+            player.body.velocity.y = 0;
+            player.body.velocity.x = 0;
             player.frame = 4;
         }
-        player.body.velocity.y = 0;
-        player.body.velocity.x = 0;
+       
 
         if ( player.maxPv<=0) {
 
