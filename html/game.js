@@ -3,6 +3,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create
 function preload() {
 	game.load.image('sky', 'assets/topwall.png');
     game.load.image('wall', 'assets/wall.png');
+     game.load.image('att', 'assets/att.png');
     game.load.spritesheet('dude2', 'assets/dude.png', 32, 48);
     game.load.spritesheet('dude', 'assets/52.png', 32, 48);
 
@@ -26,7 +27,7 @@ function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
     //  A simple background for our game
     game.add.sprite(0, 0, 'sky');
-
+    game.add.sprite(50,50,'att');
     //  The platforms group contains the ground and the 2 ledges we can jump on
     walls = game.add.group();
 
