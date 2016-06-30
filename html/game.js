@@ -136,6 +136,7 @@ function pdvMin (player, enemy) {
 }
 
 function dashTo(direction){
+    var valueDash = 10;
     console.log("dash" + cursors.up.shiftKey);
     if (cursors.up.shiftKey)
     {
@@ -143,22 +144,22 @@ function dashTo(direction){
             case 'up':
                 console.log("dash up");
                 player.body.velocity.y = -2;
-                player.y -= 20;
+                player.y -= valueDash;
                 break;
             case 'down':
                 console.log("dash down");
                 player.body.velocity.y = 2;
-                player.y += 20;
+                player.y += valueDash;
                 break;
             case 'left':
                 console.log("dash left");
                 player.body.velocity.x = -2;
-                player.x -= 20;
+                player.x -= valueDash;
                 break;
             case 'right':
                 console.log("dash right");
                 player.body.velocity.x = 2;
-                player.x += 20;
+                player.x += valueDash;
                 break;
         }
     }
@@ -198,7 +199,7 @@ function update() {
             player.x += 2;
 
             player.animations.play('right');
-            dashTo("rigth");
+            dashTo("right");
         }
         else if (cursors.up.isDown)
         {
