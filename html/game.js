@@ -4,7 +4,7 @@ function preload() {
 	game.load.image('sky', 'assets/topwall.png');
     game.load.image('wall', 'assets/wall.png');
     game.load.spritesheet('dude2', 'assets/dude.png', 32, 48);
-    game.load.spritesheet('dude_att', 'assets/attaque_full.png');
+    game.load.spritesheet('dude_att', 'assets/test.png', 30, 40);
     game.load.spritesheet('dude', 'assets/52.png', 32, 48);
 
     game.load.audio('boden', ['assets/audio/music1.mp3']);
@@ -15,6 +15,8 @@ var player;
 var enemy;
 var moveBlocked=false;
 var music;
+var player_dir;
+var attaque_anim="NA";
 
 function create() {
     
@@ -64,6 +66,7 @@ function create() {
     // The player and its settings
     player = game.add.sprite(320, game.world.height - 150, 'dude');
 
+    prepareAnimationPlayer();
     //  We need to enable physics on the player
     game.physics.enable(player, Phaser.Physics.ARCADE);
     player.body.collideWorldBounds = true;
@@ -71,24 +74,31 @@ function create() {
     player.maxPv=350;
     //  Player physics properties. Give the little guy a slight bounce.
    
-
-    //  Our two animations, walking left and right.
-    player.animations.add('left', [4, 5, 6, 7], 10, true);
-    player.animations.add('right', [8, 9, 10, 11], 10, true);
-    player.animations.add('up', [12, 13, 14, 15], 10, true);
-    player.animations.add('down', [0, 1, 2, 3], 10, true);
+    
 
 //---------------------------------ENEMY part------------------------------//
-    // The player and its settings
+    // The ennemy and its settings
     enemy=game.add.sprite(100, game.world.height - 150, 'dude2');
    
-    //  We need to enable physics on the player
+    //  We need to enable physics on the ennemy
     game.physics.enable(enemy, Phaser.Physics.ARCADE);
     enemy.body.collideWorldBounds = true;
     enemy.physicsBodyType = Phaser.Physics.ARCADE;
     enemy.enableBody = true;
 
+    attaque_anim = game.add.sprite(player.x, player.y, 'dude_att');
+    attaque_anim.animations.add('att', [0, 1, 2, 3], 8, true);
+    attaque_anim.visible=false;
+
+}
+
+function prepareAnimationPlayer(){
     
+    //  Our two animations, walking left and right.
+    player.animations.add('left', [4, 5, 6, 7], 10, true);
+    player.animations.add('right', [8, 9, 10, 11], 10, true);
+    player.animations.add('up', [12, 13, 14, 15], 10, true);
+    player.animations.add('down', [0, 1, 2, 3], 10, true);
 }
 
 function pdvMin (player, enemy) {
@@ -132,7 +142,7 @@ function pdvMin (player, enemy) {
     player.body.velocity.y = 0;
 
     //add timer when stun by hit
-    game.time.events.add(Phaser.Timer.SECOND * 1, delockMove, this)
+    game.time.events.add(Phaser.Timer.SECOND * 1, delockMove, this);
 }
 
 function dashTo(direction){
@@ -171,6 +181,7 @@ function delockMove(){
 }
 
 function update() {
+   
 	//  Collide the player and the stars with the platforms
     game.physics.arcade.overlap(player, enemy, pdvMin, null, this);
     game.physics.arcade.collide(player, walls);
@@ -191,6 +202,7 @@ function update() {
 
             player.animations.play('left');
             dashTo("left");
+            player_dir="left";
         }
         else if (cursors.right.isDown)
         {
@@ -200,6 +212,7 @@ function update() {
 
             player.animations.play('right');
             dashTo("right");
+            player_dir="right";
         }
         else if (cursors.up.isDown)
         {
@@ -209,8 +222,9 @@ function update() {
 
             player.animations.play('up');
             dashTo("up");
-
+            player_dir="up";
         }
+
         else if (cursors.down.isDown)
         {
             //  Move to the right
@@ -219,6 +233,12 @@ function update() {
 
             player.animations.play('down');
             dashTo("down");
+            player_dir="down";
+        }
+         else if (fireButton.isDown)
+        {
+           console.log("space down");
+           animationAtt();
         }
         else
         {
@@ -228,11 +248,23 @@ function update() {
             player.body.velocity.x = 0;
             player.frame = 4;
         }
-       
-
         if ( player.maxPv<=0) {
 
            player.kill();
         }
     }
+}
+
+function animationAtt(){
+     //prepare animation for att
+     attaque_anim.x=player.x;
+     attaque_anim.y=player.y;
+    attaque_anim.visible=true;
+   
+    attaque_anim.animations.play('att');
+
+   game.time.events.add(Phaser.Timer.SECOND * 0.5, destroyAnim, this);
+}
+function destroyAnim(){
+    attaque_anim.kill();
 }
