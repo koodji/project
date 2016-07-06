@@ -89,6 +89,10 @@ function create() {
     attaque_anim = game.add.sprite(player.x, player.y, 'dude_att');
     attaque_anim.animations.add('att', [0, 1, 2, 3], 8, true);
     attaque_anim.visible=false;
+    attaque_anim.physicsBodyType = Phaser.Physics.ARCADE;
+    game.physics.enable(attaque_anim, Phaser.Physics.ARCADE);
+    attaque_anim.enableBody = true;
+    attaque_anim.body.velocity.x=1;
 
 }
 
@@ -179,12 +183,17 @@ function delockMove(){
     console.log("delockMove");
     moveBlocked=false;
 }
+function touch_att(){
+    console.log("touch");
+
+}
 
 function update() {
    
 	//  Collide the player and the stars with the platforms
     game.physics.arcade.overlap(player, enemy, pdvMin, null, this);
     game.physics.arcade.collide(player, walls);
+   
    
     
     //---------------------------------------CONTROL PART--------------------------------------//
@@ -257,13 +266,13 @@ function update() {
 
 function animationAtt(){
      //prepare animation for att
-     attaque_anim.x=player.x;
-     attaque_anim.y=player.y;
+    attaque_anim.x=player.x-20;
+    attaque_anim.y=player.y;
     attaque_anim.visible=true;
    
     attaque_anim.animations.play('att');
-
-   game.time.events.add(Phaser.Timer.SECOND * 0.5, destroyAnim, this);
+    game.physics.arcade.overlap(attaque_anim, enemy, touch_att, null, this);
+    game.time.events.add(Phaser.Timer.SECOND * 0.5, destroyAnim, this);
 }
 function destroyAnim(){
     attaque_anim.kill();
