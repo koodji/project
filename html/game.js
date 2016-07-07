@@ -17,6 +17,7 @@ var moveBlocked=false;
 var music;
 var player_dir;
 var attaque_anim="NA";
+var debug=true;
 
 function create() {
     
@@ -108,12 +109,12 @@ function prepareAnimationPlayer(){
 function pdvMin (player, enemy) {
     moveBlocked=true;
 
-    console.log("Max pv player "+player.maxPv);
+    logger("Max pv player "+player.maxPv);
     player.maxPv-=20;
-    console.log("Max pv player "+player.maxPv);
+    logger("Max pv player "+player.maxPv);
 
     // Removes the star from the screen
-    console.log("player touch enemy and get Back");
+    logger("player touch enemy and get Back");
     var getBack = 18;
 
     if (cursors.left.isDown)
@@ -151,27 +152,27 @@ function pdvMin (player, enemy) {
 
 function dashTo(direction){
     var valueDash = 10;
-    console.log("dash" + cursors.up.shiftKey);
+    logger("dash" + cursors.up.shiftKey);
     if (cursors.up.shiftKey)
     {
         switch(direction){
             case 'up':
-                console.log("dash up");
+                logger("dash up");
                 player.body.velocity.y = -2;
                 player.y -= valueDash;
                 break;
             case 'down':
-                console.log("dash down");
+                logger("dash down");
                 player.body.velocity.y = 2;
                 player.y += valueDash;
                 break;
             case 'left':
-                console.log("dash left");
+                logger("dash left");
                 player.body.velocity.x = -2;
                 player.x -= valueDash;
                 break;
             case 'right':
-                console.log("dash right");
+                logger("dash right");
                 player.body.velocity.x = 2;
                 player.x += valueDash;
                 break;
@@ -180,11 +181,11 @@ function dashTo(direction){
 }
 
 function delockMove(){
-    console.log("delockMove");
+    logger("delockMove");
     moveBlocked=false;
 }
 function touch_att(){
-    console.log("touch");
+    logger("touch");
 
 }
 
@@ -194,14 +195,16 @@ function update() {
     game.physics.arcade.overlap(player, enemy, pdvMin, null, this);
     game.physics.arcade.collide(player, walls);
    
-   
-    
+   //---------------------------------------update coord foratt anime--------------------------------------//
+
+    attaque_anim.x=player.x-20;
+    attaque_anim.y=player.y;
     //---------------------------------------CONTROL PART--------------------------------------//
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
 	cursors = game.input.keyboard.createCursorKeys();
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    
+    attq_button_pressed();
     if (!moveBlocked){
         if (cursors.left.isDown)
         {
@@ -212,6 +215,7 @@ function update() {
             player.animations.play('left');
             dashTo("left");
             player_dir="left";
+            attq_button_pressed();
         }
         else if (cursors.right.isDown)
         {
@@ -222,6 +226,7 @@ function update() {
             player.animations.play('right');
             dashTo("right");
             player_dir="right";
+            attq_button_pressed();
         }
         else if (cursors.up.isDown)
         {
@@ -232,6 +237,7 @@ function update() {
             player.animations.play('up');
             dashTo("up");
             player_dir="up";
+            attq_button_pressed();
         }
 
         else if (cursors.down.isDown)
@@ -243,11 +249,7 @@ function update() {
             player.animations.play('down');
             dashTo("down");
             player_dir="down";
-        }
-         else if (fireButton.isDown)
-        {
-           console.log("space down");
-           animationAtt();
+            attq_button_pressed();
         }
         else
         {
@@ -275,5 +277,19 @@ function animationAtt(){
     game.time.events.add(Phaser.Timer.SECOND * 0.5, destroyAnim, this);
 }
 function destroyAnim(){
-    attaque_anim.kill();
+    attaque_anim.animations.stop();
+    attaque_anim.visible=false;
+    attaque_anim.frame=0;
+}
+function attq_button_pressed(){
+     if (fireButton.isDown)
+        {
+           logger("space down");
+           animationAtt();
+        }
+}
+function logger(text){
+    if (debug){
+        console.log(text);
+    }
 }
