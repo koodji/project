@@ -87,6 +87,8 @@ function create() {
     enemy.physicsBodyType = Phaser.Physics.ARCADE;
     enemy.enableBody = true;
 
+//---------------------------------anim_att part------------------------------//
+
     attaque_anim = game.add.sprite(player.x, player.y, 'dude_att');
     attaque_anim.animations.add('att', [0, 1, 2, 3], 8, true);
     attaque_anim.visible=false;
@@ -267,6 +269,21 @@ function update() {
 }
 
 function animationAtt(){
+
+    //selon la direction du perso modifier les coord de l'animation
+    /*if (player_dir==="up"){
+        player.animations.play('att_up');
+    }
+    else if (player_dir==="down"){
+        player.animations.play('att_down');
+    }
+    else if (player_dir==="left"){
+        player.animations.play('att_left');
+    }
+    else if (player_dir==="right"){
+        player.animations.play('att_right');
+    }*/
+
      //prepare animation for att
     attaque_anim.x=player.x-20;
     attaque_anim.y=player.y;
