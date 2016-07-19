@@ -302,6 +302,7 @@ function attq_button_pressed(){
      if (fireButton.isDown)
         {
            logger("space down");
+           toto();
            animationAtt();
         }
 }
