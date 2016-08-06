@@ -1,12 +1,15 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
-	game.load.image('sky', 'assets/topwall.png');
+    game.load.image('sky', 'assets/topwall.png');
     game.load.image('wall', 'assets/wall.png');
     game.load.spritesheet('dude2', 'assets/dude.png', 32, 48);
-    game.load.spritesheet('dude_att', 'assets/test.png', 30, 40);
-    game.load.spritesheet('dude', 'assets/52.png', 32, 48);
 
+    //game.load.spritesheet('dude_att', 'assets/test.png', 30, 40);
+    game.load.spritesheet('dude_att', 'assets/knight_att.png', 1150/6, 500/3);
+    
+    //game.load.spritesheet('dude', 'assets/52.png', 32, 48);
+    game.load.spritesheet('dude', 'assets/knight_walk.png', 570/9, 250/4);
     game.load.audio('boden', ['assets/audio/music1.mp3']);
 }
 
@@ -26,7 +29,7 @@ function create() {
     //decomment line for music
     //music.play();
 
-	 //  We're going to be using physics, so enable the Arcade Physics system / physics mise en place
+     //  We're going to be using physics, so enable the Arcade Physics system / physics mise en place
     game.physics.startSystem(Phaser.Physics.ARCADE);
     //  A simple background for our game
     game.add.sprite(0, 0, 'sky');
@@ -90,7 +93,7 @@ function create() {
 //---------------------------------anim_att part------------------------------//
 
     attaque_anim = game.add.sprite(player.x, player.y, 'dude_att');
-    attaque_anim.animations.add('att', [0, 1, 2, 3], 8, true);
+    attaque_anim.animations.add('att', [0, 1, 2, 3, 4, 5], 8, true);
     attaque_anim.visible=false;
     attaque_anim.physicsBodyType = Phaser.Physics.ARCADE;
     game.physics.enable(attaque_anim, Phaser.Physics.ARCADE);
@@ -102,10 +105,10 @@ function create() {
 function prepareAnimationPlayer(){
     
     //  Our two animations, walking left and right.
-    player.animations.add('left', [4, 5, 6, 7], 10, true);
-    player.animations.add('right', [8, 9, 10, 11], 10, true);
-    player.animations.add('up', [12, 13, 14, 15], 10, true);
-    player.animations.add('down', [0, 1, 2, 3], 10, true);
+    player.animations.add('left', [9, 10, 11, 12, 13, 14, 15, 16, 17], 10, true);
+    player.animations.add('right', [27 ,28, 29, 30, 31, 32, 33, 34, 35], 10, true);
+    player.animations.add('up', [0, 1, 2, 3, 4, 5, 6, 7, 8], 10, true);
+    player.animations.add('down', [18 ,19, 20, 21, 22, 23, 24, 25, 26], 10, true);
 }
 
 function pdvMin (player, enemy) {
@@ -193,7 +196,7 @@ function touch_att(){
 
 function update() {
    
-	//  Collide the player and the stars with the platforms
+    //  Collide the player and the stars with the platforms
     game.physics.arcade.overlap(player, enemy, pdvMin, null, this);
     game.physics.arcade.collide(player, walls);
    
@@ -204,7 +207,7 @@ function update() {
     //---------------------------------------CONTROL PART--------------------------------------//
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
-	cursors = game.input.keyboard.createCursorKeys();
+    cursors = game.input.keyboard.createCursorKeys();
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     attq_button_pressed();
     if (!moveBlocked){
@@ -285,13 +288,13 @@ function animationAtt(){
     }*/
 
      //prepare animation for att
-    attaque_anim.x=player.x-20;
+    attaque_anim.x=player.x;
     attaque_anim.y=player.y;
     attaque_anim.visible=true;
    
     attaque_anim.animations.play('att');
     game.physics.arcade.overlap(attaque_anim, enemy, touch_att, null, this);
-    game.time.events.add(Phaser.Timer.SECOND * 0.5, destroyAnim, this);
+    game.time.events.add(Phaser.Timer.SECOND * 0.7, destroyAnim, this);
 }
 function destroyAnim(){
     attaque_anim.animations.stop();
