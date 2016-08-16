@@ -5,11 +5,9 @@ function preload() {
     game.load.image('wall', 'assets/wall.png');
     game.load.spritesheet('dude2', 'assets/dude.png', 32, 48);
 
-    //game.load.spritesheet('dude_att', 'assets/test.png', 30, 40);
-    game.load.spritesheet('dude_att', 'assets/knight_att.png', 1150/6, 500/3);
+    game.load.spritesheet('bullet', 'assets/bullet_2.png', 8, 18);
     
-    //game.load.spritesheet('dude', 'assets/52.png', 32, 48);
-    game.load.spritesheet('dude', 'assets/knight_walk.png', 570/9, 250/4);
+    game.load.spritesheet('dude', 'assets/52.png', 32, 48);
     game.load.audio('boden', ['assets/audio/music1.mp3']);
 }
 
@@ -20,6 +18,7 @@ var moveBlocked=false;
 var music;
 var player_dir;
 var attaque_anim="NA";
+var bullet;
 var debug=true;
 
 function create() {
@@ -90,25 +89,25 @@ function create() {
     enemy.physicsBodyType = Phaser.Physics.ARCADE;
     enemy.enableBody = true;
 
-//---------------------------------anim_att part------------------------------//
-
-    attaque_anim = game.add.sprite(player.x, player.y, 'dude_att');
-    attaque_anim.animations.add('att', [0, 1, 2, 3, 4, 5], 8, true);
-    attaque_anim.visible=false;
-    attaque_anim.physicsBodyType = Phaser.Physics.ARCADE;
-    game.physics.enable(attaque_anim, Phaser.Physics.ARCADE);
-    attaque_anim.enableBody = true;
-    attaque_anim.body.velocity.x=1;
+//---------------------------------bullet part------------------------------//
+    // The ennemy and its settings
+    bullet=game.add.sprite(player.x, player.y, 'bullet');
+   
+    //  We need to enable physics on the ennemy
+    game.physics.enable(bullet, Phaser.Physics.ARCADE);
+    bullet.body.collideWorldBounds = true;
+    bullet.physicsBodyType = Phaser.Physics.ARCADE;
+    bullet.enableBody = true;
 
 }
 
 function prepareAnimationPlayer(){
     
     //  Our two animations, walking left and right.
-    player.animations.add('left', [9, 10, 11, 12, 13, 14, 15, 16, 17], 10, true);
-    player.animations.add('right', [27 ,28, 29, 30, 31, 32, 33, 34, 35], 10, true);
-    player.animations.add('up', [0, 1, 2, 3, 4, 5, 6, 7, 8], 10, true);
-    player.animations.add('down', [18 ,19, 20, 21, 22, 23, 24, 25, 26], 10, true);
+    player.animations.add('left', [4, 5, 6, 7], 10, true);
+    player.animations.add('right', [8, 9, 10, 11], 10, true);
+    player.animations.add('up', [12, 13, 14, 15], 10, true);
+    player.animations.add('down', [0, 1, 2, 3], 10, true);
 }
 
 function pdvMin (player, enemy) {
@@ -256,6 +255,26 @@ function update() {
             player_dir="down";
             attq_button_pressed();
         }
+        else if (game.input.activePointer.leftButton.isDown){
+            logger("click g "+ game.input.activePointer.clientX +" and " + game.input.activePointer.x);
+            //calcul coef directeur (ya-yb) / (xa-xb) = a  dans y = ax + k
+            var ya = game.input.activePointer.y;
+            var xa =game.input.activePointer.x;
+            var yb=player.y;
+            var xb= player.x;
+            var a = (ya-yb) / (xa-xb);
+            logger("equation ("+ya+"-"+yb+") / ("+xa+"-"+xb+") = "+a);
+            var k = ya-(a*xa);
+            logger(k);
+            for (var i = player.x ; i <player.x+100;i++){
+                bullet.x-=0.15;
+                bullet.y=a*bullet.x + k;
+            }
+           
+            game.time.events.add(Phaser.Timer.SECOND * 0.7, destroyAnim, this);
+
+        }
+
         else
         {
             //  Stand still
@@ -297,9 +316,11 @@ function animationAtt(){
     game.time.events.add(Phaser.Timer.SECOND * 0.7, destroyAnim, this);
 }
 function destroyAnim(){
-    attaque_anim.animations.stop();
-    attaque_anim.visible=false;
-    attaque_anim.frame=0;
+    bullet.x=player.x;
+    bullet.y=player.y;
+    //attaque_anim.animations.stop();
+    //attaque_anim.visible=false;
+    //attaque_anim.frame=0;
 }
 function attq_button_pressed(){
      if (fireButton.isDown)

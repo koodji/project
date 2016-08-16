@@ -5,5 +5,5 @@ function CaracterInformation() {
 }
 
     function toto(){
-    	alert(new CaracterInformation());
+    	console.log("player class");
     }
