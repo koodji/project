@@ -245,7 +245,7 @@ function update() {
 }
 
 function attq_button_pressed() {
-    
+
 }
 
 function logger(text) {
