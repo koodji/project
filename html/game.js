@@ -8,7 +8,7 @@ function preload() {
     game.load.image('sky', 'assets/topwall.png');
     game.load.image('wall', 'assets/wall.png');
     game.load.spritesheet('dude2', 'assets/dude.png', 32, 48);
-
+    game.load.image('sword', 'assets/sword_test.png');
     game.load.spritesheet('dude', 'assets/52.png', 32, 48);
     game.load.audio('boden', ['assets/audio/music1.mp3']);
 }
@@ -19,8 +19,10 @@ var enemy;
 var moveBlocked = false;
 var music;
 var player_dir;
+var sword;
 var attaque_anim = "NA";
 var debug = true;
+var spaceKey;
 
 function create() {
 
@@ -90,7 +92,19 @@ function create() {
     enemy.physicsBodyType = Phaser.Physics.ARCADE;
     enemy.enableBody = true;
 
+    //---------------------------------SWORD part------------------------------//
+    sword = game.add.sprite(player.x, player.y, 'sword');
+
+    //  We need to enable physics on the ennemy
+    game.physics.enable(sword, Phaser.Physics.ARCADE);
+    sword.body.collideWorldBounds = true;
+    sword.physicsBodyType = Phaser.Physics.ARCADE;
+    sword.enableBody = true;
+    sword.visible = false;
+
     cursors = game.input.keyboard.createCursorKeys();
+
+    spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
 }
 
@@ -241,11 +255,36 @@ function update() {
 
             player.kill();
         }
+        // if (sword.visible){
+        //     sword.x = player.x;
+        //     sword.y = player.y-10;
+        // }
     }
 }
 
 function attq_button_pressed() {
+    //TODO => timer le coup + collision
+    if (spaceKey.isDown) {
 
+        if (player_dir === "up") {
+            sword.angle=0;
+            sword.x = player.x;
+            sword.y = player.y-10;
+        } else if (player_dir === "down") {
+            sword.x = player.x+20;
+            sword.y = player.y+70;
+            sword.angle=180;
+        } else if (player_dir === "left") {
+            sword.x = player.x-20;
+            sword.y = player.y+35;
+            sword.angle=-90;
+        } else if (player_dir === "right") {
+            sword.x = player.x+55;
+            sword.y = player.y+20;
+            sword.angle=90;
+        }
+        sword.visible = true;
+    }
 }
 
 function logger(text) {
