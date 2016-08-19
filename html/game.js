@@ -266,25 +266,35 @@ function attq_button_pressed() {
     //TODO => timer le coup + collision
     if (spaceKey.isDown) {
 
-        if (player_dir === "up") {
-            sword.angle=0;
-            sword.x = player.x;
-            sword.y = player.y-10;
-        } else if (player_dir === "down") {
-            sword.x = player.x+20;
-            sword.y = player.y+70;
-            sword.angle=180;
-        } else if (player_dir === "left") {
-            sword.x = player.x-20;
-            sword.y = player.y+35;
-            sword.angle=-90;
-        } else if (player_dir === "right") {
-            sword.x = player.x+55;
-            sword.y = player.y+20;
-            sword.angle=90;
-        }
+        swordAtt();
+
         sword.visible = true;
+        game.time.events.add(Phaser.Timer.SECOND * 0.7, fadeSword, this);
     }
+}
+
+function swordAtt() {
+    if (player_dir === "up") {
+        sword.angle = 0;
+        sword.x = player.x;
+        sword.y = player.y - 10;
+    } else if (player_dir === "down") {
+        sword.x = player.x + 20;
+        sword.y = player.y + 70;
+        sword.angle = 180;
+    } else if (player_dir === "left") {
+        sword.x = player.x - 20;
+        sword.y = player.y + 35;
+        sword.angle = -90;
+    } else if (player_dir === "right") {
+        sword.x = player.x + 55;
+        sword.y = player.y + 20;
+        sword.angle = 90;
+    }
+}
+
+function fadeSword() {
+    sword.visible = false;
 }
 
 function logger(text) {
