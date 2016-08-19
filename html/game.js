@@ -1,7 +1,8 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO, '', {
     preload: preload,
     create: create,
-    update: update
+    update: update,
+    render: render
 });
 
 function preload() {
@@ -23,6 +24,7 @@ var sword;
 var attaque_anim = "NA";
 var debug = true;
 var spaceKey;
+var characterTint;
 
 function create() {
 
@@ -117,7 +119,7 @@ function prepareAnimationPlayer() {
     player.animations.add('down', [0, 1, 2, 3], 10, true);
 }
 
-function pdvMin(player, enemy) {
+function pdvMin(player) {
     moveBlocked = true;
 
     logger("Max pv player " + player.maxPv);
@@ -127,23 +129,27 @@ function pdvMin(player, enemy) {
     // Removes the star from the screen
     logger("player touch enemy and get Back");
     var getBack = 18;
-
-    if (cursors.left.isDown) {
-        //  Move to the left
-        player.body.velocity.x = getBack;
-        player.x += getBack;
-    } else if (cursors.right.isDown) {
-        //  Move to the right
-        player.body.velocity.x = -getBack;
-        player.x -= getBack;
-    } else if (cursors.up.isDown) {
-        //  Move to the right
-        player.body.velocity.y = getBack;
-        player.y += getBack;
-    } else if (cursors.down.isDown) {
-        //  Move to the right
-        player.body.velocity.y = -getBack;
-        player.y -= getBack;
+    switch (player_dir) {
+        case 'up':
+            //  Move to the right
+            player.body.velocity.y = getBack;
+            player.y += getBack;
+            break;
+        case 'down':
+            //  Move to the right
+            player.body.velocity.y = -getBack;
+            player.y -= getBack;
+            break;
+        case 'left':
+            //  Move to the left
+            player.body.velocity.x = getBack;
+            player.x += getBack;
+            break;
+        case 'right':
+            //  Move to the right
+            player.body.velocity.x = -getBack;
+            player.x -= getBack;
+            break;
     }
 
     player.animations.stop();
@@ -188,10 +194,7 @@ function delockMove() {
     moveBlocked = false;
 }
 
-function touch_att() {
-    logger("touch");
 
-}
 
 function update() {
 
@@ -255,10 +258,9 @@ function update() {
 
             player.kill();
         }
-        // if (sword.visible){
-        //     sword.x = player.x;
-        //     sword.y = player.y-10;
-        // }
+        if (sword.visible) {
+            swordAtt();
+        }
     }
 }
 
@@ -269,8 +271,25 @@ function attq_button_pressed() {
         swordAtt();
 
         sword.visible = true;
-        game.time.events.add(Phaser.Timer.SECOND * 0.7, fadeSword, this);
+        game.physics.arcade.overlap(sword, enemy, touch_att, null, this);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this);
     }
+}
+
+function touch_att() {
+    logger("Sword touch ennemy");
+    pdvMin(enemy);
+    changeTintWhenTouch(enemy);  
+}
+
+function changeTintWhenTouch(character){
+    characterTint=character;
+    characterTint.tint = '0xff0000';
+    game.time.events.add(Phaser.Timer.SECOND * 0.3, resetTint, this);
+}
+
+function resetTint(character) {
+    characterTint.tint = '0xFFFFFF';
 }
 
 function swordAtt() {
@@ -301,4 +320,10 @@ function logger(text) {
     if (debug) {
         console.log(text);
     }
+}
+
+function render() {
+
+    game.debug.text("pdv player : " + player.maxPv, 32, 32);
+
 }
