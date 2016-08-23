@@ -1,9 +1,12 @@
-function CaracterInformation() {
-  this.name = "toto";
-  this.age = 13;
-  this.species = "Homo Sapiens";
-}
+function CharacterInformation(name) {
+	this.name = name;
+	this.attq = 50;
+	this.def = 30;
+	this.maxLife = 100;
+	this.life = this.maxLife;
 
-    function toto(){
-    	console.log("player class");
-    }
+	this.takeDamage = function(damage) {
+		logger(this.name + " take Damage " + damage);
+		this.life -= damage;
+	}
+}

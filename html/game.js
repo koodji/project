@@ -79,7 +79,7 @@ function create() {
     game.physics.enable(player, Phaser.Physics.ARCADE);
     player.body.collideWorldBounds = true;
     player.enableBody = true;
-    player.maxPv = 350;
+    player.info = new CharacterInformation("p1");
     //  Player physics properties. Give the little guy a slight bounce.
 
 
@@ -93,6 +93,7 @@ function create() {
     enemy.body.collideWorldBounds = true;
     enemy.physicsBodyType = Phaser.Physics.ARCADE;
     enemy.enableBody = true;
+    enemy.info = new CharacterInformation("e1");
 
     //---------------------------------SWORD part------------------------------//
     sword = game.add.sprite(player.x, player.y, 'sword');
@@ -122,9 +123,9 @@ function prepareAnimationPlayer() {
 function pdvMin(player) {
     moveBlocked = true;
 
-    logger("Max pv player " + player.maxPv);
-    player.maxPv -= 20;
-    logger("Max pv player " + player.maxPv);
+    logger("Max pv player " + player.info.life + "/" + player.info.maxPv);
+    player.info.takeDamage(enemy.info.attq);
+    logger("Max pv player " + player.info.life + "/" + player.info.maxPv);
 
     // Removes the star from the screen
     logger("player touch enemy and get Back");
@@ -198,6 +199,18 @@ function delockMove() {
 
 function update() {
 
+    //----------------------------------ennemy follow--------------------------//
+    var distance = Math.sqrt(Math.pow(enemy.x - player.x, 2) + Math.pow(enemy.y - player.y, 2));
+    logger(distance);
+    if (distance > 50) {
+        //game.physics.arcade.moveToObject(enemy, player, 100);
+        game.add.tween(enemy).to({x:player.x,y:player.y},2000,Phaser.Easing.Quadratic.InOut, true);
+    }
+    else {
+        game.physics.arcade.moveToObject(enemy, player, 0);
+    }
+
+
     //  Collide the player and the stars with the platforms
     game.physics.arcade.overlap(player, enemy, pdvMin, null, this);
     game.physics.arcade.collide(player, walls);
@@ -254,13 +267,14 @@ function update() {
             player.body.velocity.x = 0;
             player.frame = 4;
         }
-        if (player.maxPv <= 0) {
 
-            player.kill();
-        }
         if (sword.visible) {
             swordAtt();
         }
+    }
+    if (player.info.life <= 0) {
+
+        player.kill();
     }
 }
 
@@ -279,11 +293,11 @@ function attq_button_pressed() {
 function touch_att() {
     logger("Sword touch ennemy");
     pdvMin(enemy);
-    changeTintWhenTouch(enemy);  
+    changeTintWhenTouch(enemy);
 }
 
-function changeTintWhenTouch(character){
-    characterTint=character;
+function changeTintWhenTouch(character) {
+    characterTint = character;
     characterTint.tint = '0xff0000';
     game.time.events.add(Phaser.Timer.SECOND * 0.3, resetTint, this);
 }
@@ -324,6 +338,7 @@ function logger(text) {
 
 function render() {
 
-    game.debug.text("pdv player : " + player.maxPv, 32, 32);
+    game.debug.text("pdv " + player.info.name + " : " + player.info.life, 32, 32);
+    game.debug.text("pdv " + enemy.info.name + " : " + enemy.info.life, 32, 52);
 
 }
