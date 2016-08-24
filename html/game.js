@@ -8,7 +8,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', {
 function preload() {
     game.load.image('sky', 'assets/topwall.png');
     game.load.image('wall', 'assets/wall.png');
-    game.load.spritesheet('dude2', 'assets/dude.png', 32, 48);
+    game.load.spritesheet('dude2', 'assets/enemy.png', 32, 48);
     game.load.image('sword', 'assets/sword_test.png');
     game.load.spritesheet('dude', 'assets/52.png', 32, 48);
     game.load.audio('boden', ['assets/audio/music1.mp3']);
@@ -87,7 +87,7 @@ function create() {
     //---------------------------------ENEMY part------------------------------//
     // The ennemy and its settings
     enemy = game.add.sprite(100, game.world.height - 150, 'dude2');
-
+    prepareAnimationEnemy();
     //  We need to enable physics on the ennemy
     game.physics.enable(enemy, Phaser.Physics.ARCADE);
     enemy.body.collideWorldBounds = true;
@@ -109,6 +109,15 @@ function create() {
 
     spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
+}
+
+function prepareAnimationEnemy() {
+
+    //  Our two animations, walking left and right.
+    enemy.animations.add('left', [4, 5, 6, 7], 10, true);
+    enemy.animations.add('right', [8, 9, 10, 11], 10, true);
+    enemy.animations.add('up', [12, 13, 14, 15], 10, true);
+    enemy.animations.add('down', [0, 1, 2, 3], 10, true);
 }
 
 function prepareAnimationPlayer() {
@@ -201,10 +210,10 @@ function update() {
 
     //----------------------------------ennemy follow--------------------------//
     var distance = Math.sqrt(Math.pow(enemy.x - player.x, 2) + Math.pow(enemy.y - player.y, 2));
-    logger(distance);
+    //logger(distance);
     if (distance > 50) {
-        //game.physics.arcade.moveToObject(enemy, player, 100);
-        game.add.tween(enemy).to({x:player.x,y:player.y},2000,Phaser.Easing.Quadratic.InOut, true);
+        game.physics.arcade.moveToObject(enemy, player, 100);
+        //game.add.tween(enemy).to({x:player.x,y:player.y},2000,Phaser.Easing.Quadratic.InOut, true);
     }
     else {
         game.physics.arcade.moveToObject(enemy, player, 0);
@@ -275,6 +284,10 @@ function update() {
     if (player.info.life <= 0) {
 
         player.kill();
+    }
+    if (enemy.info.life <= 0) {
+
+        enemy.kill();
     }
 }
 

@@ -6,7 +6,7 @@ function CharacterInformation(name) {
 	this.life = this.maxLife;
 
 	this.takeDamage = function(damage) {
-		logger(this.name + " take Damage " + damage);
+		logger(this.name + " take Damage " + damage+" game = "+game);
 		this.life -= damage;
 	}
 }
