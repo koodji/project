@@ -19,7 +19,6 @@ var player;
 var enemy;
 var moveBlocked = false;
 var music;
-var player_dir;
 var sword;
 var attaque_anim = "NA";
 var debug = true;
@@ -139,7 +138,7 @@ function pdvMin(player) {
     // Removes the star from the screen
     logger("player touch enemy and get Back");
     var getBack = 18;
-    switch (player_dir) {
+    switch (player.info.player_dir) {
         case 'up':
             //  Move to the right
             player.body.velocity.y = getBack;
@@ -267,7 +266,7 @@ function update() {
 
             player.animations.play('left');
             dashTo("left");
-            player_dir = "left";
+            player.info.player_dir = "left";
             attq_button_pressed();
         } else if (cursors.right.isDown) {
             //  Move to the right
@@ -276,7 +275,7 @@ function update() {
 
             player.animations.play('right');
             dashTo("right");
-            player_dir = "right";
+            player.info.player_dir = "right";
             attq_button_pressed();
         } else if (cursors.up.isDown) {
             //  Move to the right
@@ -285,7 +284,7 @@ function update() {
 
             player.animations.play('up');
             dashTo("up");
-            player_dir = "up";
+            player.info.player_dir = "up";
             attq_button_pressed();
         } else if (cursors.down.isDown) {
             //  Move to the right
@@ -294,7 +293,7 @@ function update() {
 
             player.animations.play('down');
             dashTo("down");
-            player_dir = "down";
+            player.info.player_dir = "down";
             attq_button_pressed();
         } else {
             //  Stand still
@@ -347,19 +346,19 @@ function resetTint(character) {
 }
 
 function swordAtt() {
-    if (player_dir === "up") {
+    if (player.info.player_dir === "up") {
         sword.angle = 0;
         sword.x = player.x;
         sword.y = player.y - 10;
-    } else if (player_dir === "down") {
+    } else if (player.info.player_dir === "down") {
         sword.x = player.x + 20;
         sword.y = player.y + 70;
         sword.angle = 180;
-    } else if (player_dir === "left") {
+    } else if (player.info.player_dir === "left") {
         sword.x = player.x - 20;
         sword.y = player.y + 35;
         sword.angle = -90;
-    } else if (player_dir === "right") {
+    } else if (player.info.player_dir === "right") {
         sword.x = player.x + 55;
         sword.y = player.y + 20;
         sword.angle = 90;

@@ -4,9 +4,14 @@ function CharacterInformation(name) {
 	this.def = 30;
 	this.maxLife = 100;
 	this.life = this.maxLife;
+	this.player_dir='NA';
 
 	this.takeDamage = function(damage) {
 		logger(this.name + " take Damage " + damage+" game = "+game);
 		this.life -= damage;
+	}
+
+	this.changeDir = function(direction){
+		this.player_dir=direction;
 	}
 }
