@@ -210,19 +210,46 @@ function update() {
 
     //----------------------------------ennemy follow--------------------------//
     var distance = Math.sqrt(Math.pow(enemy.x - player.x, 2) + Math.pow(enemy.y - player.y, 2));
-    //logger(distance);
     if (distance > 50) {
-        game.physics.arcade.moveToObject(enemy, player, 100);
-        //game.add.tween(enemy).to({x:player.x,y:player.y},2000,Phaser.Easing.Quadratic.InOut, true);
+        if (Math.random()>0.5) {
+            if (enemy.x < player.x) {
+                enemy.body.velocity.x = 2;
+                enemy.x += 2;
+                enemy.animations.play("right");
+            } else {
+                enemy.body.velocity.x = -2;
+                enemy.x -= 2;
+                enemy.animations.play("left");
+            }
+        } else {
+            if (enemy.y > player.y) {
+                enemy.body.velocity.y = -2;
+                enemy.y -= 2;
+                enemy.animations.play("up");
+            } else  {
+                enemy.body.velocity.y = +2;
+                enemy.y += 2;
+                enemy.animations.play("down");
+            }
+        }
+    } else {
+        enemy.animations.stop();
+        enemy.body.velocity.x = 0;
     }
-    else {
-        game.physics.arcade.moveToObject(enemy, player, 0);
-    }
+    //logger(distance);
+    // if (distance > 50) {
+    //     game.physics.arcade.moveToObject(enemy, player, 100);
+    //     //game.add.tween(enemy).to({x:player.x,y:player.y},2000,Phaser.Easing.Quadratic.InOut, true);
+    // }
+    // else {
+    //     game.physics.arcade.moveToObject(enemy, player, 0);
+    // }
 
 
     //  Collide the player and the stars with the platforms
     game.physics.arcade.overlap(player, enemy, pdvMin, null, this);
     game.physics.arcade.collide(player, walls);
+    game.physics.arcade.collide(enemy, walls);
 
     //---------------------------------------update coord foratt anime--------------------------------------//
 
