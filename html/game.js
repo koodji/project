@@ -234,6 +234,7 @@ function update() {
     } else {
         enemy.animations.stop();
         enemy.body.velocity.x = 0;
+        enemy.body.velocity.y = 0;
     }
     //logger(distance);
     // if (distance > 50) {
