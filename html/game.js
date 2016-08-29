@@ -17,13 +17,13 @@ function preload() {
 var walls;
 var player;
 var enemy;
-var moveBlocked = false;
 var music;
 var sword;
 var attaque_anim = "NA";
 var debug = true;
 var spaceKey;
 var characterTint;
+var canAttack = true;
 
 function create() {
 
@@ -129,8 +129,8 @@ function prepareAnimationPlayer() {
 }
 
 function pdvMin(player) {
-    moveBlocked = true;
-
+    player.info.moveBlocked = true;
+    logger("Name of player wich is touch " + player.info.name);
     logger("Max pv player " + player.info.life + "/" + player.info.maxPv);
     player.info.takeDamage(enemy.info.attq);
     logger("Max pv player " + player.info.life + "/" + player.info.maxPv);
@@ -166,8 +166,13 @@ function pdvMin(player) {
     player.body.velocity.y = 0;
 
     //add timer when stun by hit
-    game.time.events.add(Phaser.Timer.SECOND * 1, delockMove, this);
+    game.time.events.add(Phaser.Timer.SECOND * 1, function() {
+        logger("delockMove");
+        player.info.moveBlocked = false;
+    }, this);
 }
+
+
 
 function dashTo(direction) {
     var valueDash = 10;
@@ -198,36 +203,37 @@ function dashTo(direction) {
     }
 }
 
-function delockMove() {
-    logger("delockMove");
-    moveBlocked = false;
-}
-
-
-
 function update() {
 
     //----------------------------------ennemy follow--------------------------//
     var distance = Math.sqrt(Math.pow(enemy.x - player.x, 2) + Math.pow(enemy.y - player.y, 2));
-    if (distance > 50) {
-        if (Math.random()>0.5) {
+    var speed = 1;
+    if (distance > 50 && !enemy.info.moveBlocked) {
+        if (Math.abs(enemy.x - player.x) > Math.abs(enemy.y - player.y) + 10) {
+            enemy.body.velocity.y = 0;
             if (enemy.x < player.x) {
-                enemy.body.velocity.x = 2;
-                enemy.x += 2;
+                enemy.info.player_dir = "right";
+                enemy.body.velocity.x = speed;
+                enemy.x += speed;
                 enemy.animations.play("right");
             } else {
-                enemy.body.velocity.x = -2;
-                enemy.x -= 2;
+                enemy.info.player_dir = "left";
+                enemy.body.velocity.x = -speed;
+                enemy.x -= speed;
                 enemy.animations.play("left");
             }
         } else {
+
+            enemy.body.velocity.x = 0;
             if (enemy.y > player.y) {
-                enemy.body.velocity.y = -2;
-                enemy.y -= 2;
+                enemy.info.player_dir = "up";
+                enemy.body.velocity.y = -speed;
+                enemy.y -= speed;
                 enemy.animations.play("up");
-            } else  {
-                enemy.body.velocity.y = +2;
-                enemy.y += 2;
+            } else {
+                enemy.info.player_dir = "down";
+                enemy.body.velocity.y = +speed;
+                enemy.y += speed;
                 enemy.animations.play("down");
             }
         }
@@ -235,15 +241,8 @@ function update() {
         enemy.animations.stop();
         enemy.body.velocity.x = 0;
         enemy.body.velocity.y = 0;
+        enemy.animations.play(enemy.info.player_dir);
     }
-    //logger(distance);
-    // if (distance > 50) {
-    //     game.physics.arcade.moveToObject(enemy, player, 100);
-    //     //game.add.tween(enemy).to({x:player.x,y:player.y},2000,Phaser.Easing.Quadratic.InOut, true);
-    // }
-    // else {
-    //     game.physics.arcade.moveToObject(enemy, player, 0);
-    // }
 
 
     //  Collide the player and the stars with the platforms
@@ -259,7 +258,7 @@ function update() {
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
     attq_button_pressed();
-    if (!moveBlocked) {
+    if (!player.info.moveBlocked) {
         if (cursors.left.isDown) {
             //  Move to the left
             player.body.velocity.x = -2;
@@ -301,7 +300,8 @@ function update() {
             player.animations.stop();
             player.body.velocity.y = 0;
             player.body.velocity.x = 0;
-            player.frame = 4;
+            //player.frame = 4;
+            player.animations.play(player.info.player_dir);
         }
 
         if (sword.visible) {
@@ -320,14 +320,19 @@ function update() {
 
 function attq_button_pressed() {
     //TODO => timer le coup + collision
-    if (spaceKey.isDown) {
+    if (spaceKey.isDown && canAttack) {
 
         swordAtt();
 
         sword.visible = true;
         game.physics.arcade.overlap(sword, enemy, touch_att, null, this);
         game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this);
     }
+}
+
+function attackAgain() {
+    canAttack = true;
 }
 
 function touch_att() {
@@ -378,7 +383,9 @@ function logger(text) {
 
 function render() {
 
-    game.debug.text("pdv " + player.info.name + " : " + player.info.life, 32, 32);
-    game.debug.text("pdv " + enemy.info.name + " : " + enemy.info.life, 32, 52);
+    game.debug.text("pdv " + player.info.name + " : " + player.info.life + "- dir " + player.info.player_dir, 32, 32);
+    game.debug.text("pdv " + enemy.info.name + " : " + enemy.info.life + "- dir " + enemy.info.player_dir, 32, 52);
+    game.debug.text("move " + player.info.moveBlocked);
+    //game.debug.text("x / y " + enemy.x + " : " + enemy.y, 32, 92);
 
 }
