@@ -17,8 +17,8 @@ function preload() {
 var walls;
 var player;
 var enemy;
+var enemies;
 var music;
-var sword;
 var attaque_anim = "NA";
 var debug = true;
 var spaceKey;
@@ -94,20 +94,29 @@ function create() {
     enemy.enableBody = true;
     enemy.info = new CharacterInformation("e1");
 
+    enemies = game.add.physicsGroup();
+    for (var i = 0; i <= 5; i++) {
+        var e = enemies.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'dude2', game.rnd.between(0, 35));
+    }
     //---------------------------------SWORD part------------------------------//
-    sword = game.add.sprite(player.x, player.y, 'sword');
-
-    //  We need to enable physics on the ennemy
-    game.physics.enable(sword, Phaser.Physics.ARCADE);
-    sword.body.collideWorldBounds = true;
-    sword.physicsBodyType = Phaser.Physics.ARCADE;
-    sword.enableBody = true;
-    sword.visible = false;
+   createSword(player);
+   createSword(enemy);
 
     cursors = game.input.keyboard.createCursorKeys();
 
     spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
+}
+
+function createSword(character){
+    character.sword = game.add.sprite(character.x, character.y, 'sword');
+
+    //  We need to enable physics on the ennemy
+    game.physics.enable(character.sword, Phaser.Physics.ARCADE);
+    character.sword.body.collideWorldBounds = true;
+    character.sword.physicsBodyType = Phaser.Physics.ARCADE;
+    character.sword.enableBody = true;
+    character.sword.visible = false;
 }
 
 function prepareAnimationEnemy() {
@@ -204,6 +213,9 @@ function dashTo(direction) {
 }
 
 function update() {
+
+    game.physics.arcade.collide(player, enemies);
+    game.physics.arcade.collide(enemy, enemies);
 
     //----------------------------------ennemy follow--------------------------//
     var distance = Math.sqrt(Math.pow(enemy.x - player.x, 2) + Math.pow(enemy.y - player.y, 2));
@@ -304,8 +316,8 @@ function update() {
             player.animations.play(player.info.player_dir);
         }
 
-        if (sword.visible) {
-            swordAtt();
+        if (player.sword.visible) {
+            swordAtt(player);
         }
     }
     if (player.info.life <= 0) {
@@ -319,13 +331,14 @@ function update() {
 }
 
 function attq_button_pressed() {
-    //TODO => timer le coup + collision
     if (spaceKey.isDown && canAttack) {
 
-        swordAtt();
+        swordAtt(player);
 
-        sword.visible = true;
-        game.physics.arcade.overlap(sword, enemy, touch_att, null, this);
+        player.sword.visible = true;
+
+        //timer + collision
+        game.physics.arcade.overlap(player.sword, enemy, touch_att, null, this);
         game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this);
         game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this);
     }
@@ -351,28 +364,28 @@ function resetTint(character) {
     characterTint.tint = '0xFFFFFF';
 }
 
-function swordAtt() {
+function swordAtt(attackPlayer) {
     if (player.info.player_dir === "up") {
-        sword.angle = 0;
-        sword.x = player.x;
-        sword.y = player.y - 10;
+        attackPlayer.sword.angle = 0;
+        attackPlayer.sword.x = player.x;
+        attackPlayer.sword.y = player.y - 10;
     } else if (player.info.player_dir === "down") {
-        sword.x = player.x + 20;
-        sword.y = player.y + 70;
-        sword.angle = 180;
+        attackPlayer.sword.x = player.x + 20;
+        attackPlayer.sword.y = player.y + 70;
+        attackPlayer.sword.angle = 180;
     } else if (player.info.player_dir === "left") {
-        sword.x = player.x - 20;
-        sword.y = player.y + 35;
-        sword.angle = -90;
+        attackPlayer.sword.x = player.x - 20;
+        attackPlayer.sword.y = player.y + 35;
+        attackPlayer.sword.angle = -90;
     } else if (player.info.player_dir === "right") {
-        sword.x = player.x + 55;
-        sword.y = player.y + 20;
-        sword.angle = 90;
+        attackPlayer.sword.x = player.x + 55;
+        attackPlayer.sword.y = player.y + 20;
+        attackPlayer.sword.angle = 90;
     }
 }
 
 function fadeSword() {
-    sword.visible = false;
+    player.sword.visible = false;
 }
 
 function logger(text) {

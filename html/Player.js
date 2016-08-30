@@ -6,6 +6,7 @@ function CharacterInformation(name) {
 	this.life = this.maxLife;
 	this.player_dir = 'NA';
 	this.moveBlocked = false;
+	this.sword;
 
 	this.takeDamage = function(damage) {
 		logger(this.name + " take Damage " + damage + " game = " + game);
