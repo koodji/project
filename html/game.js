@@ -23,7 +23,6 @@ var attaque_anim = "NA";
 var debug = true;
 var spaceKey;
 var characterTint;
-var canAttack = true;
 
 function create() {
 
@@ -95,12 +94,16 @@ function create() {
     enemy.info = new CharacterInformation("e1");
 
     enemies = game.add.physicsGroup();
-    for (var i = 0; i <= 5; i++) {
+    for (var i = 0; i <= 3; i++) {
         var e = enemies.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'dude2', game.rnd.between(0, 35));
     }
     //---------------------------------SWORD part------------------------------//
-   createSword(player);
-   createSword(enemy);
+    createSword(player);
+    createSword(enemy);
+
+    enemy.info.sword.x = 55;
+    player.info.sword.x = 10;
+
 
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -108,15 +111,15 @@ function create() {
 
 }
 
-function createSword(character){
-    character.sword = game.add.sprite(character.x, character.y, 'sword');
+function createSword(character) {
+    character.info.sword = game.add.sprite(character.x, character.y, 'sword');
 
     //  We need to enable physics on the ennemy
-    game.physics.enable(character.sword, Phaser.Physics.ARCADE);
-    character.sword.body.collideWorldBounds = true;
-    character.sword.physicsBodyType = Phaser.Physics.ARCADE;
-    character.sword.enableBody = true;
-    character.sword.visible = false;
+    game.physics.enable(character.info.sword, Phaser.Physics.ARCADE);
+    character.info.sword.body.collideWorldBounds = true;
+    character.info.sword.physicsBodyType = Phaser.Physics.ARCADE;
+    character.info.sword.enableBody = true;
+    character.info.sword.visible = false;
 }
 
 function prepareAnimationEnemy() {
@@ -316,8 +319,11 @@ function update() {
             player.animations.play(player.info.player_dir);
         }
 
-        if (player.sword.visible) {
+        if (player.info.sword.visible) {
             swordAtt(player);
+        }
+        if (enemy.info.sword.visible){
+            swordAtt(enemy);
         }
     }
     if (player.info.life <= 0) {
@@ -331,27 +337,33 @@ function update() {
 }
 
 function attq_button_pressed() {
-    if (spaceKey.isDown && canAttack) {
-
+    if (spaceKey.isDown && player.info.canAttack) {
+        //ia_attack(enemy);
         swordAtt(player);
 
-        player.sword.visible = true;
-
-        //timer + collision
-        game.physics.arcade.overlap(player.sword, enemy, touch_att, null, this);
-        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this);
-        game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this);
+        game.physics.arcade.overlap(player.info.sword, enemy, function(){touch_att(enemy);}, null, this);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this,player);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this,player);
     }
 }
 
-function attackAgain() {
-    canAttack = true;
+function ia_attack(iaGuy){
+    if (iaGuy.info.canAttack){
+        swordAtt(iaGuy);
+        game.physics.arcade.overlap(iaGuy.info.sword, player, function (){touch_att(player);}, null, this);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this,iaGuy);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this,iaGuy);
+    }
 }
 
-function touch_att() {
-    logger("Sword touch ennemy");
-    pdvMin(enemy);
-    changeTintWhenTouch(enemy);
+function attackAgain(character) {
+    character.info.canAttack = true;
+}
+
+function touch_att(characterHit) {
+    logger("Sword touch ennemy " +characterHit.info.name );
+    pdvMin(characterHit);
+    changeTintWhenTouch(characterHit);
 }
 
 function changeTintWhenTouch(character) {
@@ -365,27 +377,29 @@ function resetTint(character) {
 }
 
 function swordAtt(attackPlayer) {
-    if (player.info.player_dir === "up") {
-        attackPlayer.sword.angle = 0;
-        attackPlayer.sword.x = player.x;
-        attackPlayer.sword.y = player.y - 10;
-    } else if (player.info.player_dir === "down") {
-        attackPlayer.sword.x = player.x + 20;
-        attackPlayer.sword.y = player.y + 70;
-        attackPlayer.sword.angle = 180;
-    } else if (player.info.player_dir === "left") {
-        attackPlayer.sword.x = player.x - 20;
-        attackPlayer.sword.y = player.y + 35;
-        attackPlayer.sword.angle = -90;
-    } else if (player.info.player_dir === "right") {
-        attackPlayer.sword.x = player.x + 55;
-        attackPlayer.sword.y = player.y + 20;
-        attackPlayer.sword.angle = 90;
+    if (attackPlayer.info.player_dir === "up") {
+        attackPlayer.info.sword.angle = 0;
+        attackPlayer.info.sword.x = attackPlayer.x;
+        attackPlayer.info.sword.y = attackPlayer.y - 10;
+    } else if (attackPlayer.info.player_dir === "down") {
+        attackPlayer.info.sword.x = attackPlayer.x + 20;
+        attackPlayer.info.sword.y = attackPlayer.y + 70;
+        attackPlayer.info.sword.angle = 180;
+    } else if (attackPlayer.info.player_dir === "left") {
+        attackPlayer.info.sword.x = attackPlayer.x - 20;
+        attackPlayer.info.sword.y = attackPlayer.y + 35;
+        attackPlayer.info.sword.angle = -90;
+    } else if (attackPlayer.info.player_dir === "right") {
+        attackPlayer.info.sword.x = attackPlayer.x + 55;
+        attackPlayer.info.sword.y = attackPlayer.y + 20;
+        attackPlayer.info.sword.angle = 90;
     }
+    attackPlayer.info.sword.visible = true;
 }
 
-function fadeSword() {
-    player.sword.visible = false;
+function fadeSword(character) {
+    logger("fadeSword charname = "+character.info.name);
+    character.info.sword.visible = false;
 }
 
 function logger(text) {
@@ -396,8 +410,8 @@ function logger(text) {
 
 function render() {
 
-    game.debug.text("pdv " + player.info.name + " : " + player.info.life + "- dir " + player.info.player_dir, 32, 32);
-    game.debug.text("pdv " + enemy.info.name + " : " + enemy.info.life + "- dir " + enemy.info.player_dir, 32, 52);
+    game.debug.text("pdv " + player.info.name + " : " + player.info.life + " - dir " + player.info.player_dir, 32, 32);
+    game.debug.text("pdv " + enemy.info.name + " : " + enemy.info.life + " - dir " + enemy.info.player_dir, 32, 52);
     game.debug.text("move " + player.info.moveBlocked);
     //game.debug.text("x / y " + enemy.x + " : " + enemy.y, 32, 92);
 
