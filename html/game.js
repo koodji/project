@@ -85,7 +85,7 @@ function create() {
     //---------------------------------ENEMY part------------------------------//
     // The ennemy and its settings
     enemy = game.add.sprite(100, game.world.height - 150, 'dude2');
-    prepareAnimationEnemy();
+    prepareAnimationEnemy(enemy);
     //  We need to enable physics on the ennemy
     game.physics.enable(enemy, Phaser.Physics.ARCADE);
     enemy.body.collideWorldBounds = true;
@@ -96,7 +96,14 @@ function create() {
     enemies = game.add.physicsGroup();
     for (var i = 0; i <= 3; i++) {
         var e = enemies.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'dude2', game.rnd.between(0, 35));
+        e.info = new CharacterInformation("ia" + i);
+        prepareAnimationEnemy(e);
     }
+
+    enemies.forEach(function(iaGuy) {
+        logger(iaGuy.info.name);
+    });
+
     //---------------------------------SWORD part------------------------------//
     createSword(player);
     createSword(enemy);
@@ -122,13 +129,13 @@ function createSword(character) {
     character.info.sword.visible = false;
 }
 
-function prepareAnimationEnemy() {
+function prepareAnimationEnemy(characterEn) {
 
     //  Our two animations, walking left and right.
-    enemy.animations.add('left', [4, 5, 6, 7], 10, true);
-    enemy.animations.add('right', [8, 9, 10, 11], 10, true);
-    enemy.animations.add('up', [12, 13, 14, 15], 10, true);
-    enemy.animations.add('down', [0, 1, 2, 3], 10, true);
+    characterEn.animations.add('left', [4, 5, 6, 7], 10, true);
+    characterEn.animations.add('right', [8, 9, 10, 11], 10, true);
+    characterEn.animations.add('up', [12, 13, 14, 15], 10, true);
+    characterEn.animations.add('down', [0, 1, 2, 3], 10, true);
 }
 
 function prepareAnimationPlayer() {
@@ -219,51 +226,18 @@ function update() {
 
     game.physics.arcade.collide(player, enemies);
     game.physics.arcade.collide(enemy, enemies);
-
-    //----------------------------------ennemy follow--------------------------//
-    var distance = Math.sqrt(Math.pow(enemy.x - player.x, 2) + Math.pow(enemy.y - player.y, 2));
-    var speed = 1;
-    if (distance > 50 && !enemy.info.moveBlocked) {
-        if (Math.abs(enemy.x - player.x) > Math.abs(enemy.y - player.y) + 10) {
-            enemy.body.velocity.y = 0;
-            if (enemy.x < player.x) {
-                enemy.info.player_dir = "right";
-                enemy.body.velocity.x = speed;
-                enemy.x += speed;
-                enemy.animations.play("right");
-            } else {
-                enemy.info.player_dir = "left";
-                enemy.body.velocity.x = -speed;
-                enemy.x -= speed;
-                enemy.animations.play("left");
-            }
-        } else {
-
-            enemy.body.velocity.x = 0;
-            if (enemy.y > player.y) {
-                enemy.info.player_dir = "up";
-                enemy.body.velocity.y = -speed;
-                enemy.y -= speed;
-                enemy.animations.play("up");
-            } else {
-                enemy.info.player_dir = "down";
-                enemy.body.velocity.y = +speed;
-                enemy.y += speed;
-                enemy.animations.play("down");
-            }
-        }
-    } else {
-        enemy.animations.stop();
-        enemy.body.velocity.x = 0;
-        enemy.body.velocity.y = 0;
-        enemy.animations.play(enemy.info.player_dir);
-    }
-
+    game.physics.arcade.collide(enemies);
 
     //  Collide the player and the stars with the platforms
-    game.physics.arcade.overlap(player, enemy, pdvMin, null, this);
+    game.physics.arcade.overlap(player, enemies, pdvMin, null, this);
     game.physics.arcade.collide(player, walls);
     game.physics.arcade.collide(enemy, walls);
+
+    enemies.forEach(function(iaGuy) {
+        artificialIntelligence(iaGuy);
+    });
+
+
 
     //---------------------------------------update coord foratt anime--------------------------------------//
 
@@ -322,7 +296,7 @@ function update() {
         if (player.info.sword.visible) {
             swordAtt(player);
         }
-        if (enemy.info.sword.visible){
+        if (enemy.info.sword.visible) {
             swordAtt(enemy);
         }
     }
@@ -336,23 +310,69 @@ function update() {
     }
 }
 
+function artificialIntelligence(character) {
+
+    //----------------------------------ennemy follow--------------------------//
+    var distance = Math.sqrt(Math.pow(character.x - player.x, 2) + Math.pow(character.y - player.y, 2));
+    var speed = 1;
+    if (distance > 50 && !character.info.moveBlocked) {
+        if (Math.abs(character.x - player.x) > Math.abs(character.y - player.y) + 10) {
+            character.body.velocity.y = 0;
+            if (character.x < player.x) {
+                character.info.player_dir = "right";
+                character.body.velocity.x = speed;
+                character.x += speed;
+                character.animations.play("right");
+            } else {
+                character.info.player_dir = "left";
+                character.body.velocity.x = -speed;
+                character.x -= speed;
+                character.animations.play("left");
+            }
+        } else {
+
+            character.body.velocity.x = 0;
+            if (character.y > player.y) {
+                character.info.player_dir = "up";
+                character.body.velocity.y = -speed;
+                character.y -= speed;
+                character.animations.play("up");
+            } else {
+                character.info.player_dir = "down";
+                character.body.velocity.y = +speed;
+                character.y += speed;
+                character.animations.play("down");
+            }
+        }
+    } else {
+        character.animations.stop();
+        character.body.velocity.x = 0;
+        character.body.velocity.y = 0;
+        character.animations.play(character.info.player_dir);
+    }
+}
+
 function attq_button_pressed() {
     if (spaceKey.isDown && player.info.canAttack) {
         //ia_attack(enemy);
         swordAtt(player);
 
-        game.physics.arcade.overlap(player.info.sword, enemy, function(){touch_att(enemy);}, null, this);
-        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this,player);
-        game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this,player);
+        game.physics.arcade.overlap(player.info.sword, enemy, function() {
+            touch_att(enemy);
+        }, null, this);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this, player);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this, player);
     }
 }
 
-function ia_attack(iaGuy){
-    if (iaGuy.info.canAttack){
+function ia_attack(iaGuy) {
+    if (iaGuy.info.canAttack) {
         swordAtt(iaGuy);
-        game.physics.arcade.overlap(iaGuy.info.sword, player, function (){touch_att(player);}, null, this);
-        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this,iaGuy);
-        game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this,iaGuy);
+        game.physics.arcade.overlap(iaGuy.info.sword, player, function() {
+            touch_att(player);
+        }, null, this);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this, iaGuy);
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this, iaGuy);
     }
 }
 
@@ -361,9 +381,21 @@ function attackAgain(character) {
 }
 
 function touch_att(characterHit) {
-    logger("Sword touch ennemy " +characterHit.info.name );
+    logger("Sword touch ennemy " + characterHit.info.name);
     pdvMin(characterHit);
+    var text = game.add.text(characterHit.x, characterHit.y, characterHit.info.attq, {
+        font: "10pt Courier",
+        fill: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 2
+    });
+    game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeText, this, text);
     changeTintWhenTouch(characterHit);
+}
+
+function fadeText(text) {
+    text.visible = false;
+
 }
 
 function changeTintWhenTouch(character) {
@@ -398,7 +430,7 @@ function swordAtt(attackPlayer) {
 }
 
 function fadeSword(character) {
-    logger("fadeSword charname = "+character.info.name);
+    logger("fadeSword charname = " + character.info.name);
     character.info.sword.visible = false;
 }
 
