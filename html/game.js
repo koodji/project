@@ -357,9 +357,14 @@ function attq_button_pressed() {
         //ia_attack(enemy);
         swordAtt(player);
 
-        game.physics.arcade.overlap(player.info.sword, enemy, function() {
-            touch_att(enemy);
-        }, null, this);
+
+        enemies.forEach(function(enem) {
+            game.physics.arcade.overlap(player.info.sword, enem, function() {
+                touch_att(enem);
+            }, null, this);
+        });
+
+
         game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeSword, this, player);
         game.time.events.add(Phaser.Timer.SECOND * 0.5, attackAgain, this, player);
     }
