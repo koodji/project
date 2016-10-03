@@ -234,6 +234,11 @@ function update() {
     game.physics.arcade.collide(enemy, walls);
 
     enemies.forEach(function(iaGuy) {
+
+        if (iaGuy.info.life <= 0) {
+            iaGuy.kill();
+        }
+
         artificialIntelligence(iaGuy);
     });
 
@@ -304,10 +309,8 @@ function update() {
 
         player.kill();
     }
-    if (enemy.info.life <= 0) {
 
-        enemy.kill();
-    }
+
 }
 
 function artificialIntelligence(character) {
@@ -447,9 +450,7 @@ function logger(text) {
 
 function render() {
 
-    game.debug.text("pdv " + player.info.name + " : " + player.info.life + " - dir " + player.info.player_dir, 32, 32);
-    game.debug.text("pdv " + enemy.info.name + " : " + enemy.info.life + " - dir " + enemy.info.player_dir, 32, 52);
-    game.debug.text("move " + player.info.moveBlocked);
-    //game.debug.text("x / y " + enemy.x + " : " + enemy.y, 32, 92);
+    game.debug.text("pdv " + player.info.name + " : " + player.info.life , 32, 32);
+    //game.debug.text("pdv " + enemy.info.name + " : " + enemy.info.life, 32, 52);
 
 }
