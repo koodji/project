@@ -12,6 +12,7 @@ function preload() {
     game.load.image('sword', 'assets/sword_test.png');
     game.load.spritesheet('dude', 'assets/52.png', 32, 48);
     game.load.audio('boden', ['assets/audio/music1.mp3']);
+    game.load.spritesheet('impact', 'assets/impact.png', 146, 104, 18);
 }
 
 var walls;
@@ -23,6 +24,8 @@ var attaque_anim = "NA";
 var debug = true;
 var spaceKey;
 var characterTint;
+var impact;
+var boom;
 
 function create() {
 
@@ -110,6 +113,8 @@ function create() {
 
     enemy.info.sword.x = 55;
     player.info.sword.x = 10;
+
+    // other animation
 
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -398,6 +403,13 @@ function touch_att(characterHit) {
         strokeThickness: 2
     });
     game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeText, this, text);
+
+    //add here animation when touch
+    impact = game.add.sprite(characterHit.x, characterHit.y, 'impact');
+    boom = impact.animations.add('boom');
+    impact.animations.play('boom', 30, false);
+
+
     changeTintWhenTouch(characterHit);
 }
 
@@ -450,7 +462,7 @@ function logger(text) {
 
 function render() {
 
-    game.debug.text("pdv " + player.info.name + " : " + player.info.life , 32, 32);
+    game.debug.text("pdv " + player.info.name + " : " + player.info.life, 32, 32);
     //game.debug.text("pdv " + enemy.info.name + " : " + enemy.info.life, 32, 52);
 
 }
