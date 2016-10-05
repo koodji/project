@@ -114,8 +114,6 @@ function create() {
     enemy.info.sword.x = 55;
     player.info.sword.x = 10;
 
-    // other animation
-
 
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -154,10 +152,16 @@ function prepareAnimationPlayer() {
 
 function pdvMin(player) {
     player.info.moveBlocked = true;
+
     logger("Name of player wich is touch " + player.info.name);
     logger("Max pv player " + player.info.life + "/" + player.info.maxPv);
+
+
     player.info.takeDamage(enemy.info.attq);
+
+
     logger("Max pv player " + player.info.life + "/" + player.info.maxPv);
+
 
     // Removes the star from the screen
     logger("player touch enemy and get Back");
@@ -193,7 +197,14 @@ function pdvMin(player) {
     game.time.events.add(Phaser.Timer.SECOND * 1, function() {
         logger("delockMove");
         player.info.moveBlocked = false;
+
     }, this);
+
+    game.time.events.add(Phaser.Timer.SECOND * 3, function() {
+        player.info.invincible = false;
+    }, this);
+
+
 }
 
 
@@ -234,7 +245,7 @@ function update() {
     game.physics.arcade.collide(enemies);
 
     //  Collide the player and the stars with the platforms
-    game.physics.arcade.overlap(player, enemies, pdvMin, null, this);
+    game.physics.arcade.overlap(player, enemies, touch_att, null, this);
     game.physics.arcade.collide(player, walls);
     game.physics.arcade.collide(enemy, walls);
 
@@ -395,22 +406,25 @@ function attackAgain(character) {
 
 function touch_att(characterHit) {
     logger("Sword touch ennemy " + characterHit.info.name);
-    pdvMin(characterHit);
-    var text = game.add.text(characterHit.x, characterHit.y, characterHit.info.attq, {
-        font: "10pt Courier",
-        fill: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 2
-    });
-    game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeText, this, text);
+    if (!characterHit.info.invincible) {
+        characterHit.info.invincible = true;
+        pdvMin(characterHit);
+        var text = game.add.text(characterHit.x, characterHit.y, characterHit.info.attq, {
+            font: "10pt Courier",
+            fill: "#ffffff",
+            stroke: "#000000",
+            strokeThickness: 2
+        });
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, fadeText, this, text);
 
-    //add here animation when touch
-    impact = game.add.sprite(characterHit.x, characterHit.y, 'impact');
-    boom = impact.animations.add('boom');
-    impact.animations.play('boom', 30, false);
+        //add here animation when touch
+        impact = game.add.sprite(characterHit.x - 35, characterHit.y - 35, 'impact');
+        boom = impact.animations.add('boom');
+        impact.animations.play('boom', 30, false);
 
 
-    changeTintWhenTouch(characterHit);
+        changeTintWhenTouch(characterHit);
+    }
 }
 
 function fadeText(text) {
